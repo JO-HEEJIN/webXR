@@ -33,19 +33,6 @@
                     }
                 });
 
-                var gestureManager = new BABYLON.WebXRAbstractMotionControllerPointerSelection(scene, xrHelper.input);
-                gestureManager.onGestureObservable.add((eventData) => {
-                    switch (eventData.eventType) {
-                        case BABYLON.WebXRControllerPointerSelection.GESTURE_EVENT_TYPES.TAP:
-                            // 탭 제스처 처리
-                            break;
-                        case BABYLON.WebXRControllerPointerSelection.GESTURE_EVENT_TYPES.DOUBLE_TAP:
-                            // 더블 탭 제스처 처리
-                            break;
-                        // 추가적인 제스처 이벤트 처리
-                    }
-                });
-
                 return scene;
             };
             createScene().then(function(scene) {
