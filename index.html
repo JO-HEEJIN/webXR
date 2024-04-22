@@ -5,47 +5,43 @@
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <style>
         body { margin: 0; padding: 0; }
-        #renderCanvas { width: 100%; height: 100%; touch-action: none; }
+        canvas { width: 100%; height: 100%; }
     </style>
 </head>
 <body>
     <canvas id="renderCanvas"></canvas>
     <script>
-        window.addEventListener('DOMContentLoaded', function () {
-            var canvas = document.getElementById('renderCanvas');
-            var engine = new BABYLON.Engine(canvas, true);
-            var createScene = async function () {
-                var scene = new BABYLON.Scene(engine);
-                var camera = new BABYLON.ArcRotateCamera("Camera", -Math.PI / 2,  Math.PI / 2, 5, BABYLON.Vector3.Zero(), scene);
-                camera.attachControl(canvas, true);
-                camera.inputs.attached.mousewheel.detachControl(canvas);
+        // Babylon.js 장면 생성
+        const canvas = document.getElementById('renderCanvas');
+        const engine = new BABYLON.Engine(canvas, true);
+        const scene = new BABYLON.Scene(engine);
 
-                var light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+        // 카메라와 라이트 설정
+        const camera = new BABYLON.FreeCamera('camera', new BABYLON.Vector3(0, 5, -10), scene);
+        camera.setTarget(BABYLON.Vector3.Zero());
+        const light = new BABYLON.HemisphericLight('light', new BABYLON.Vector3(0, 1, 0), scene);
 
-                var xrHelper = await scene.createDefaultXRExperienceAsync();
+        // 3D 객체 생성 (상자)
+        const box = BABYLON.MeshBuilder.CreateBox('box', {}, scene);
 
-                var box = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
-                box.setEnabled(false);
+        // 렌더링 루프
+        engine.runRenderLoop(() => {
+            scene.render();
+        });
 
-                var hitTestObservable = xrHelper.baseExperience.featuresManager.enableFeature(BABYLON.WebXRHitTest, 'latest', {hitTestType: BABYLON.WebXRHitTest.HIT_TEST_TYPE_PLANE});
-                hitTestObservable.onHitTestResultObservable.add((results) => {
-                    if (results.length) {
-                        var hit = results[0];
-                        box.position = hit.position;
-                        box.setEnabled(true);
-                    }
-                });
-
-                return scene;
-            };
-            createScene().then(function(scene) {
-                engine.runRenderLoop(function () {
-                    if (scene) {
-                        scene.render();
-                    }
-                });
-                window.addEventListener('resize', function () {
-                    engine.resize();
+        // WebXR 세션 생성
+        navigator.xr.requestSession('immersive-ar', { requiredFeatures: ['hit-test'] }).then((session) => {
+            session.updateRenderState({ baseLayer: new XRWebGLLayer(session, gl) });
+            session.requestReferenceSpace('viewer').then((refSpace) => {
+                session.requestAnimationFrame((t, frame) => {
+                    const pose = frame.getViewerPose(refSpace);
+                    
+                    // TODO: OpenCV와 유사한 이미지 처리 로직 구현
+                    
+                    // 3D 객체 위치 업데이트
+                    box.position.x = pose.transform.position.x;
+                    box.position.y = pose.transform.position.y;
+                    box.position.z = pose.transform.position.z;
                 });
             });
         });
