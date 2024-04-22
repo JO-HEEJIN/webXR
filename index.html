@@ -20,13 +20,16 @@
                 camera.attachControl(canvas, true);
                 camera.inputs.attached.mousewheel.detachControl(canvas);
 
-                var xrHelper = await scene.createDefaultXRExperienceAsync({floorMeshes: [polygon]});
+                var xrHelper = await scene.createDefaultXRExperienceAsync();
 
                 var hitTestObservable = xrHelper.baseExperience.featuresManager.enableFeature(BABYLON.WebXRHitTest, 'latest', {hitTestType: BABYLON.WebXRHitTest.HIT_TEST_TYPE_PLANE});
                 hitTestObservable.onHitTestResultObservable.add((results) => {
                     if (results.length) {
                         var hit = results[0];
                         // hit.position, hit.xrHitResult - 이를 사용하여 히트 테스트 결과 처리
+                        // 여기에서 3D 메시를 생성하고, 히트 테스트의 결과 위치에 배치합니다.
+                        var box = BABYLON.MeshBuilder.CreateBox("box", {}, scene);
+                        box.position = hit.position;
                     }
                 });
 
