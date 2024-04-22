@@ -48,14 +48,15 @@
 
                 return scene;
             };
-            var scene = createScene();
-            engine.runRenderLoop(function () {
-                if (scene) {
-                    scene.render();
-                }
-            });
-            window.addEventListener('resize', function () {
-                engine.resize();
+            createScene().then(function(scene) {
+                engine.runRenderLoop(function () {
+                    if (scene) {
+                        scene.render();
+                    }
+                });
+                window.addEventListener('resize', function () {
+                    engine.resize();
+                });
             });
         });
     </script>
